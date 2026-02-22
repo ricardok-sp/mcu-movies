@@ -4,9 +4,9 @@ frontend:
   phases:
     build:
       commands:
-        - echo "Building MCU Movies Explorer..."
+        - echo "Building MCU Movies Explorer"
   artifacts:
-    baseDirectory: .
+    baseDirectory: public
     files:
       - '**/*'
   cache:
