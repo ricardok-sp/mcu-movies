@@ -96,7 +96,7 @@
 
         .movies-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 20px;
             margin-bottom: 50px;
         }
@@ -110,26 +110,46 @@
             border: 2px solid #333;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
         .movie-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-15px);
             border-color: #e50000;
-            box-shadow: 0 10px 30px rgba(229, 0, 0, 0.3);
+            box-shadow: 0 15px 40px rgba(229, 0, 0, 0.4);
         }
 
         .movie-poster {
             width: 100%;
-            height: 280px;
+            height: 260px;
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3em;
-            font-weight: bold;
-            color: #e50000;
-            text-align: center;
-            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .movie-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .movie-card:hover .movie-poster img {
+            transform: scale(1.05);
+        }
+
+        .movie-poster.loading {
+            background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
 
         .movie-info {
@@ -140,10 +160,11 @@
         }
 
         .movie-title {
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: 700;
             margin-bottom: 8px;
             color: #fff;
+            line-height: 1.2;
         }
 
         .movie-year {
@@ -176,8 +197,9 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
+            background-color: rgba(0, 0, 0, 0.95);
             animation: fadeIn 0.3s ease;
+            overflow-y: auto;
         }
 
         @keyframes fadeIn {
@@ -187,19 +209,20 @@
 
         .modal.show {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
+            padding: 20px;
         }
 
         .modal-content {
             background: #1a1a2e;
             padding: 40px;
             border-radius: 10px;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
+            max-width: 900px;
+            width: 100%;
             border: 2px solid #e50000;
             animation: slideIn 0.3s ease;
+            margin-top: 20px;
         }
 
         @keyframes slideIn {
@@ -213,6 +236,33 @@
             }
         }
 
+        .modal-header {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .modal-poster {
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e50000;
+            box-shadow: 0 10px 30px rgba(229, 0, 0, 0.3);
+        }
+
+        .modal-poster img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .modal-title-section h2 {
+            color: #e50000;
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+
         .close-btn {
             color: #e50000;
             float: right;
@@ -224,12 +274,6 @@
 
         .close-btn:hover {
             color: #ff6b6b;
-        }
-
-        .modal h2 {
-            color: #e50000;
-            margin-bottom: 15px;
-            clear: both;
         }
 
         .modal-section {
@@ -300,12 +344,15 @@
 
         @media (max-width: 768px) {
             .movies-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             }
 
             .modal-content {
                 padding: 20px;
-                margin: 20px;
+            }
+
+            .modal-header {
+                grid-template-columns: 1fr;
             }
 
             h1 {
@@ -315,6 +362,10 @@
             .modal-grid {
                 grid-template-columns: 1fr;
             }
+
+            .modal-title-section h2 {
+                font-size: 1.5em;
+            }
         }
     </style>
 </head>
@@ -322,7 +373,7 @@
     <div class="container">
         <header>
             <h1>🎬 MCU Chronology</h1>
-            <p class="subtitle">Explore todos os filmes do Marvel Cinematic Universe</p>
+            <p class="subtitle">Explore todos os filmes do Marvel Cinematic Universe com pôsteres e curiosidades</p>
         </header>
 
         <div class="controls">
@@ -351,6 +402,7 @@
                 release: "2008-05-02",
                 chronology: 1,
                 phase: "Fase 1",
+                poster: "https://image.tmdb.org/t/p/w500/wy8c76sG56Kc9I2i23rSe0K00j3.jpg",
                 directors: "Jon Favreau",
                 writers: "Mark Fergus, Hawk Ostby, Art Marcum, Matt Holloway",
                 stars: "Robert Downey Jr., Gwyneth Paltrow, Terrence Howard",
@@ -371,6 +423,7 @@
                 release: "2008-06-13",
                 chronology: 2,
                 phase: "Fase 1",
+                poster: "https://image.tmdb.org/t/p/w500/xvx4Axcow5Co1orhd2D6KoLd1m6.jpg",
                 directors: "Louis Leterrier",
                 writers: "Zack Penn",
                 stars: "Edward Norton, Liv Tyler, Tim Roth",
@@ -391,6 +444,7 @@
                 release: "2010-05-07",
                 chronology: 3,
                 phase: "Fase 1",
+                poster: "https://image.tmdb.org/t/p/w500/6k8NghVKVeB9Y1zz91nsfLRwL5o.jpg",
                 directors: "Jon Favreau",
                 writers: "Justin Theroux",
                 stars: "Robert Downey Jr., Gwyneth Paltrow, Don Cheadle",
@@ -411,6 +465,7 @@
                 release: "2011-05-06",
                 chronology: 4,
                 phase: "Fase 1",
+                poster: "https://image.tmdb.org/t/p/w500/prSZX8e7dUWmv4EE4FnrM0bull2.jpg",
                 directors: "Kenneth Branagh",
                 writers: "Ashley Edward Miller, Zack Stentz, Don Payne",
                 stars: "Chris Hemsworth, Tom Hiddleston, Natalie Portman",
@@ -431,6 +486,7 @@
                 release: "2011-07-22",
                 chronology: 5,
                 phase: "Fase 1",
+                poster: "https://image.tmdb.org/t/p/w500/qJmN0o0EE2Ya6tEV4DeEPSQxZg4.jpg",
                 directors: "Joe Johnston",
                 writers: "Christopher Markus, Stephen McFeely",
                 stars: "Chris Evans, Tommy Lee Jones, Hugo Weaving",
@@ -451,6 +507,7 @@
                 release: "2012-05-04",
                 chronology: 6,
                 phase: "Fase 1",
+                poster: "https://image.tmdb.org/t/p/w500/cezWGaG33gWC1jNrXGeMIStQWO.jpg",
                 directors: "Joss Whedon",
                 writers: "Joss Whedon",
                 stars: "Robert Downey Jr., Chris Evans, Chris Hemsworth, Scarlett Johansson, Jeremy Renner, Mark Ruffalo",
@@ -471,6 +528,7 @@
                 release: "2013-05-03",
                 chronology: 7,
                 phase: "Fase 2",
+                poster: "https://image.tmdb.org/t/p/w500/jnZGHEAJarLZs5k3b6C1K4Jj6aH.jpg",
                 directors: "Shane Black",
                 writers: "Drew Pearce, Shane Black",
                 stars: "Robert Downey Jr., Gwyneth Paltrow, Guy Pearce",
@@ -491,6 +549,7 @@
                 release: "2013-11-08",
                 chronology: 8,
                 phase: "Fase 2",
+                poster: "https://image.tmdb.org/t/p/w500/7TZCf7PgGEBXFXIsSRsrxGjjR0e.jpg",
                 directors: "Alan Taylor",
                 writers: "Christopher L. Yost, Christopher Markus, Stephen McFeely",
                 stars: "Chris Hemsworth, Tom Hiddleston, Natalie Portman",
@@ -511,6 +570,7 @@
                 release: "2014-04-04",
                 chronology: 9,
                 phase: "Fase 2",
+                poster: "https://image.tmdb.org/t/p/w500/VQqHLXtJIrWxoKvBLmWxwxCHulA.jpg",
                 directors: "Anthony Russo, Joe Russo",
                 writers: "Christopher Markus, Stephen McFeely",
                 stars: "Chris Evans, Scarlett Johansson, Sebastian Stan",
@@ -531,6 +591,7 @@
                 release: "2014-08-01",
                 chronology: 10,
                 phase: "Fase 2",
+                poster: "https://image.tmdb.org/t/p/w500/r7vmZjiyZikCU1bZ0c8CY8sSXE5.jpg",
                 directors: "James Gunn",
                 writers: "James Gunn, Nicole Perlman",
                 stars: "Chris Pratt, Zoe Saldana, Dave Bautista, Bradley Cooper, Vin Diesel",
@@ -551,6 +612,7 @@
                 release: "2015-05-01",
                 chronology: 11,
                 phase: "Fase 2",
+                poster: "https://image.tmdb.org/t/p/w500/t90Y3G8UYYBBk3fYCRXZzV6E0J2.jpg",
                 directors: "Joss Whedon",
                 writers: "Joss Whedon, Jon Spaihts, Justin Theroux",
                 stars: "Robert Downey Jr., Chris Evans, Chris Hemsworth, Scarlett Johansson, Jeremy Renner, Mark Ruffalo",
@@ -571,6 +633,7 @@
                 release: "2015-07-17",
                 chronology: 12,
                 phase: "Fase 2",
+                poster: "https://image.tmdb.org/t/p/w500/xvx4Axcow5Co1orhd2D6KoLd1m6.jpg",
                 directors: "Peyton Reed",
                 writers: "Edgar Wright, Joe Cornish, Adam McKay, Paul Rudd",
                 stars: "Paul Rudd, Evangeline Lilly, Michael Douglas",
@@ -591,6 +654,7 @@
                 release: "2016-05-06",
                 chronology: 13,
                 phase: "Fase 3",
+                poster: "https://image.tmdb.org/t/p/w500/kSBXou5QwCI2fHXC4NKcnyeHjJn.jpg",
                 directors: "Anthony Russo, Joe Russo",
                 writers: "Christopher Markus, Stephen McFeely",
                 stars: "Chris Evans, Robert Downey Jr., Chadwick Boseman, Tom Holland",
@@ -611,6 +675,7 @@
                 release: "2016-11-04",
                 chronology: 14,
                 phase: "Fase 3",
+                poster: "https://image.tmdb.org/t/p/w500/bjXvIy2eUN0uUSTw2AWh9oh0PyC.jpg",
                 directors: "Scott Derrickson",
                 writers: "Jon Spaihts, Scott Derrickson, C. Robert Cargill",
                 stars: "Benedict Cumberbatch, Chiwetel Ejiofor, Rachel McAdams",
@@ -631,6 +696,7 @@
                 release: "2017-05-05",
                 chronology: 15,
                 phase: "Fase 3",
+                poster: "https://image.tmdb.org/t/p/w500/5aXeFeKGz5NMWIHjKtS8O8e3W6e.jpg",
                 directors: "James Gunn",
                 writers: "James Gunn",
                 stars: "Chris Pratt, Zoe Saldana, Dave Bautista, Bradley Cooper, Vin Diesel",
@@ -651,6 +717,7 @@
                 release: "2017-07-07",
                 chronology: 16,
                 phase: "Fase 3",
+                poster: "https://image.tmdb.org/t/p/w500/c24sv2weTHPsmDC5DwLCjrCsnga.jpg",
                 directors: "Jon Watts",
                 writers: "Jonathan Goldstein, John Francis Daley, Jon Watts, Chris McKenna, Erik Sommers",
                 stars: "Tom Holland, Michael Keaton, Zendaya",
@@ -671,6 +738,7 @@
                 release: "2017-11-03",
                 chronology: 17,
                 phase: "Fase 3",
+                poster: "https://image.tmdb.org/t/p/w500/rzRwf2yxzFGMVHynQBnQ4lfCjzo.jpg",
                 directors: "Taika Waititi",
                 writers: "Eric Pearson, Taika Waititi, Craig Kyle, Christopher L. Yost",
                 stars: "Chris Hemsworth, Tom Hiddleston, Cate Blanchett, Jeff Goldblum",
@@ -691,6 +759,7 @@
                 release: "2018-02-16",
                 chronology: 18,
                 phase: "Fase 3",
+                poster: "https://image.tmdb.org/t/p/w500/uxzzxijgPIY7slzFvMotPv7kvjb.jpg",
                 directors: "Ryan Coogler",
                 writers: "Ryan Coogler, Joe Robert Cole",
                 stars: "Chadwick Boseman, Michael B. Jordan, Lupita Nyong'o",
@@ -711,6 +780,7 @@
                 release: "2018-04-27",
                 chronology: 19,
                 phase: "Fase 3",
+                poster: "https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkv4m5Kw1P.jpg",
                 directors: "Anthony Russo, Joe Russo",
                 writers: "Christopher Markus, Stephen McFeely",
                 stars: "Robert Downey Jr., Chris Evans, Chris Hemsworth, Scarlett Johansson, Elizabeth Olsen, Sebastian Stan",
@@ -731,6 +801,7 @@
                 release: "2018-07-06",
                 chronology: 20,
                 phase: "Fase 3",
+                poster: "https://image.tmdb.org/t/p/w500/svnnHEIB1d0Gqa7qv0zTZPh5Rpc.jpg",
                 directors: "Peyton Reed",
                 writers: "Chris McKenna, Erik Sommers, Paul Rudd, Andrew Barrer, Gabriel Ferrari",
                 stars: "Paul Rudd, Evangeline Lilly, Michael Douglas",
@@ -751,6 +822,7 @@
                 release: "2019-03-08",
                 chronology: 21,
                 phase: "Fase 3",
+                poster: "https://image.tmdb.org/t/p/w500/w9kR8KCsq85dV6D1djJOHR0a89m.jpg",
                 directors: "Anna Boden, Ryan Fleck",
                 writers: "Anna Boden, Ryan Fleck, Liz Flahive, Carly Mensch, Nicole Perlman, Meg LeFauve",
                 stars: "Brie Larson, Samuel L. Jackson, Ben Mendelsohn",
@@ -771,6 +843,7 @@
                 release: "2019-04-26",
                 chronology: 22,
                 phase: "Fase 3",
+                poster: "https://image.tmdb.org/t/p/w500/or86DB2i3g6ziS8FfPwGH09idkA.jpg",
                 directors: "Anthony Russo, Joe Russo",
                 writers: "Christopher Markus, Stephen McFeely",
                 stars: "Robert Downey Jr., Chris Evans, Chris Hemsworth, Scarlett Johansson, Jeremy Renner, Mark Ruffalo",
@@ -791,6 +864,7 @@
                 release: "2019-07-02",
                 chronology: 23,
                 phase: "Fase 3",
+                poster: "https://image.tmdb.org/t/p/w500/fVzXp3NwovUlLe7laIGWK55I30W.jpg",
                 directors: "Jon Watts",
                 writers: "Chris McKenna, Erik Sommers",
                 stars: "Tom Holland, Zendaya, Jake Gyllenhaal",
@@ -811,6 +885,7 @@
                 release: "2021-07-09",
                 chronology: 24,
                 phase: "Fase 4",
+                poster: "https://image.tmdb.org/t/p/w500/qyxZFMCYjPWzLbtHTQ9pVe3tFQW.jpg",
                 directors: "Cate Shortland",
                 writers: "Eric Pearson",
                 stars: "Scarlett Johansson, Florence Pugh, David Harbour",
@@ -831,6 +906,7 @@
                 release: "2021-09-03",
                 chronology: 25,
                 phase: "Fase 4",
+                poster: "https://image.tmdb.org/t/p/w500/1R4kDiB9dEiyipEKsTtI5zoCIEO.jpg",
                 directors: "Destin Daniel Cretton",
                 writers: "David Callaham, Destin Daniel Cretton, Andrew Lanham",
                 stars: "Simu Liu, Awkwafina, Tony Leung",
@@ -851,6 +927,7 @@
                 release: "2021-11-05",
                 chronology: 26,
                 phase: "Fase 4",
+                poster: "https://image.tmdb.org/t/p/w500/mHlLOl0OwNPfjYIEqv5z8HRoHWI.jpg",
                 directors: "Chloé Zhao",
                 writers: "Ryan Firpo, Kaz Firpo, Chloé Zhao",
                 stars: "Gemma Chan, Richard Madden, Angelina Jolie, Salma Hayek",
@@ -871,6 +948,7 @@
                 release: "2021-12-17",
                 chronology: 27,
                 phase: "Fase 4",
+                poster: "https://image.tmdb.org/t/p/w500/1g0dhYtq4Cv5r50z5IP1caZPaIR.jpg",
                 directors: "Jon Watts",
                 writers: "Chris McKenna, Erik Sommers, Jon Watts",
                 stars: "Tom Holland, Tobey Maguire, Andrew Garfield, Zendaya",
@@ -891,6 +969,7 @@
                 release: "2022-05-06",
                 chronology: 28,
                 phase: "Fase 4",
+                poster: "https://image.tmdb.org/t/p/w500/9Gtg7DZQaDQsVpVDU86c1G8CjWa.jpg",
                 directors: "Sam Raimi",
                 writers: "Michael Waldron",
                 stars: "Benedict Cumberbatch, Elizabeth Olsen, Xochitl Gomez",
@@ -911,6 +990,7 @@
                 release: "2022-07-06",
                 chronology: 29,
                 phase: "Fase 4",
+                poster: "https://image.tmdb.org/t/p/w500/NyLzvQUH1UdsurD5vPt0NIvB3aW.jpg",
                 directors: "Taika Waititi",
                 writers: "Taika Waititi, Jennifer Kaytin Robinson",
                 stars: "Chris Hemsworth, Natalie Portman, Christian Bale",
@@ -931,6 +1011,7 @@
                 release: "2022-11-11",
                 chronology: 30,
                 phase: "Fase 4",
+                poster: "https://image.tmdb.org/t/p/w500/qnCEwHiNy8T9XqwLbKcKzpfM9A0.jpg",
                 directors: "Ryan Coogler",
                 writers: "Ryan Coogler, Joe Robert Cole",
                 stars: "Letitia Wright, Lupita Nyong'o, Viola Davis",
@@ -951,6 +1032,7 @@
                 release: "2023-02-17",
                 chronology: 31,
                 phase: "Fase 5",
+                poster: "https://image.tmdb.org/t/p/w500/aOe3DXUUCgglrSvBUNNoQRoMKNJ.jpg",
                 directors: "Peyton Reed",
                 writers: "Jeff Loveness",
                 stars: "Paul Rudd, Evangeline Lilly, Jonathan Majors",
@@ -971,6 +1053,7 @@
                 release: "2023-05-05",
                 chronology: 32,
                 phase: "Fase 5",
+                poster: "https://image.tmdb.org/t/p/w500/xbHJHt7SyLjVm3T1RIqrz7IECd3.jpg",
                 directors: "James Gunn",
                 writers: "James Gunn",
                 stars: "Chris Pratt, Zoe Saldana, Dave Bautista, Bradley Cooper, Vin Diesel",
@@ -991,6 +1074,7 @@
                 release: "2023-11-10",
                 chronology: 33,
                 phase: "Fase 5",
+                poster: "https://image.tmdb.org/t/p/w500/wkbrlp8y8ynwgjxd0eKv9t0Ixrd.jpg",
                 directors: "Nia DaCosta",
                 writers: "Megan McDonnell, Nia DaCosta, Elissa Karasik",
                 stars: "Brie Larson, Teyonah Parris, Iman Vellani",
@@ -1011,6 +1095,7 @@
                 release: "2024-07-26",
                 chronology: 34,
                 phase: "Fase 5",
+                poster: "https://image.tmdb.org/t/p/w500/aVkkL7f0GJMhOHKqMlnNnN3J4ug.jpg",
                 directors: "Shawn Levy",
                 writers: "Rhett Reese, Paul Wernick, Ryan Reynolds",
                 stars: "Ryan Reynolds, Hugh Jackman, Emma Corrin",
@@ -1020,7 +1105,7 @@
                 curiosities: [
                     "Primeiro filme R-rated do MCU",
                     "Retorno de Hugh Jackman como Wolverine",
-                    "Ryan Reynolds finalemente no MCU oficial",
+                    "Ryan Reynolds finalmente no MCU oficial",
                     "Humor crú e ação violenta característicos"
                 ]
             }
@@ -1038,8 +1123,16 @@
                 card.className = 'movie-card';
                 card.onclick = () => showModal(movie);
 
+                const posterImg = `
+                    <div class="movie-poster loading">
+                        <img src="${movie.poster}" alt="${movie.title}" 
+                             onerror="this.parentElement.classList.remove('loading')"
+                             onload="this.parentElement.classList.remove('loading')">
+                    </div>
+                `;
+
                 card.innerHTML = `
-                    <div class="movie-poster">${movie.title.substring(0, 2).toUpperCase()}</div>
+                    ${posterImg}
                     <div class="movie-info">
                         <div class="movie-title">${movie.title}</div>
                         <div class="movie-year">${movie.year}</div>
@@ -1097,24 +1190,30 @@
 
             content.innerHTML = `
                 <span class="close-btn" onclick="closeModal()">&times;</span>
-                <h2>${movie.title}</h2>
-
-                <div class="modal-grid">
-                    <div class="modal-item">
-                        <div class="modal-item-label">📅 Ano de Lançamento</div>
-                        <div class="modal-item-value">${movie.year}</div>
+                <div class="modal-header">
+                    <div class="modal-poster">
+                        <img src="${movie.poster}" alt="${movie.title}">
                     </div>
-                    <div class="modal-item">
-                        <div class="modal-item-label">🎬 Fase MCU</div>
-                        <div class="modal-item-value">${movie.phase}</div>
-                    </div>
-                    <div class="modal-item">
-                        <div class="modal-item-label">📊 Bilheteria</div>
-                        <div class="modal-item-value">${movie.boxOffice}</div>
-                    </div>
-                    <div class="modal-item">
-                        <div class="modal-item-label">💵 Orçamento</div>
-                        <div class="modal-item-value">${movie.budget}</div>
+                    <div class="modal-title-section">
+                        <h2>${movie.title}</h2>
+                        <div class="modal-grid">
+                            <div class="modal-item">
+                                <div class="modal-item-label">📅 Lançamento</div>
+                                <div class="modal-item-value">${movie.year}</div>
+                            </div>
+                            <div class="modal-item">
+                                <div class="modal-item-label">🎬 Fase MCU</div>
+                                <div class="modal-item-value">${movie.phase}</div>
+                            </div>
+                            <div class="modal-item">
+                                <div class="modal-item-label">📊 Bilheteria</div>
+                                <div class="modal-item-value">${movie.boxOffice}</div>
+                            </div>
+                            <div class="modal-item">
+                                <div class="modal-item-label">💵 Orçamento</div>
+                                <div class="modal-item-value">${movie.budget}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
