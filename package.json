@@ -1,0 +1,12 @@
+{
+  "name": "mcu-movies",
+  "version": "1.0.0",
+  "description": "MCU Movies Explorer",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Building MCU Movies Explorer...' && mkdir -p public && cp *.html public/ 2>/dev/null || true",
+    "start": "echo 'Open public/index.html'"
+  },
+  "author": "",
+  "license": "ISC"
+}
