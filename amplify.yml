@@ -6,9 +6,8 @@ frontend:
       commands:
         - echo "Building MCU Movies Explorer..."
   artifacts:
-    baseDirectory: /
+    baseDirectory: .
     files:
-      - mcu-movies.html
-      - index.html
+      - '**/*'
   cache:
     paths: []
